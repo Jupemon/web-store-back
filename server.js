@@ -24,6 +24,11 @@ db.select('*').from('users').then(data=> {
     console.log(data);
 });
 
+/*
+app.get('mostpopular'), (req, res) => {
+    
+}
+*/
 app.get('/image/:id', (req, res) => { // sends an image based on the id of parameters
     const { id } = req.params;
     db('products').where('ID', id).then(data => {
@@ -37,7 +42,6 @@ app.get('/', (req, res) => {
         //res.type('png').sendFile(`C:/Users/Juho/Documents/ecommerce-back/images/${id}.png`);
         res.send(`<img src=C:/Users/Juho/Documents/ecommerce-back/images/${id}.png>`);
     })
-    
 })
 /*
 app.get('/profile/:id', (req, res) => {
@@ -156,6 +160,6 @@ app.post('/unregister', (req, res) => { // deletes a user
 */
 
 
-app.listen(3000, () => {
-    console.log('app is running on port 3000')
+app.listen(process.env.PORT, () => {
+    console.log(`app is running on port ${process.env.PORT}`)
 })
