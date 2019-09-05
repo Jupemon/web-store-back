@@ -35,14 +35,17 @@ app.get('/image/:id', (req, res) => { // sends an image based on the id of param
         res.sendFile(`C:/Users/Juho/Documents/ecommerce-back/images/${id}.png`);
     })
 })
-
+app.get('/', (req, res) => {
+    res.json("working"); // responds with some cool ass data
+})
+/*
 app.get('/', (req, res) => {
     const id = "271"
     db('products').where('ID', id).then(data => {
         //res.type('png').sendFile(`C:/Users/Juho/Documents/ecommerce-back/images/${id}.png`);
         res.send(`<img src=C:/Users/Juho/Documents/ecommerce-back/images/${id}.png>`);
     })
-})
+})*/
 /*
 app.get('/profile/:id', (req, res) => {
     const { id } = req.params; // take id from request parameter
