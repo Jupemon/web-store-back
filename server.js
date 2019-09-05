@@ -10,11 +10,11 @@ app.use(cors());
 const db = knex({
     client: 'pg',
     connection: {
-
+        
         connectionString: process.env.DATABASE_URL,
         ssl: true
-          
         /*
+        
         host: '127.0.0.1',
         user : 'postgres',
         password : 'test',
@@ -36,7 +36,8 @@ app.get('mostpopular'), (req, res) => {
 app.get('/image/:id', (req, res) => { // sends an image based on the id of parameters
     const { id } = req.params;
     db('products').where('ID', id).then(data => {
-        res.sendFile(`./images/${id}.png`);
+        res.sendFile(__dirname + '/images/14.png');
+        //res.sendFile(`:/images/${id}.png`);
     })
 })
 app.get('/', (req, res) => {
@@ -166,7 +167,7 @@ app.post('/unregister', (req, res) => { // deletes a user
 
 */
 
-
+//3000 process.env.PORT
 app.listen(process.env.PORT, () => {
     console.log(`app is running on port ${process.env.PORT}`)
 })
