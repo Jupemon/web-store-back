@@ -26,7 +26,7 @@ const db = knex({
 
 
 
-db.select('*').from('users').then(data=> {
+db.select('*').from('products').then(data=> {
     console.log(data);
 });
 
@@ -38,7 +38,7 @@ app.get('mostpopular'), (req, res) => {
 app.get('/image/:id', (req, res) => { // sends an image based on the id of parameters
     const { id } = req.params;
     db('products').where('ID', id).then(data => {
-        res.sendFile(`C:/Users/Juho/Documents/ecommerce-back/images/${id}.png`);
+        res.sendFile(`images/${id}.png`);
     })
 })
 app.get('/', (req, res) => {
