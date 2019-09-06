@@ -36,7 +36,7 @@ app.get('mostpopular'), (req, res) => {
 app.get('/image/:id', (req, res) => { // sends an image based on the id of parameters
     const { id } = req.params;
     db('products').where('ID', id).then(data => {
-        res.sendFile(__dirname + '/images/14.png');
+        res.sendFile(__dirname + `/images/${id}.png`);
         //res.sendFile(`:/images/${id}.png`);
     })
 })
