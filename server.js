@@ -27,7 +27,9 @@ const db = process.env.DATABASE_URL ? knex({
 
 db.select('*').from('users').then(data=> {
     console.log(data);
-});
+}).then(db('*').from('login').then(data => {
+    console.log(data)
+}))
 
 /*
 app.get('mostpopular'), (req, res) => {
@@ -35,7 +37,7 @@ app.get('mostpopular'), (req, res) => {
 }
 */
 
-
+/*
 app.get('/products', (req, res) => {
     const {color, taste, shape} = req.query;
     db('products').where('color', color).orWhere('category', "Hard Candy").then(data => {
@@ -67,10 +69,10 @@ app.get('/products', (req, res) => {
     console.log(color, taste, shape);
     //console.log(req.params.taste);
    // console.log(req.params.shape);
-    console.log();*/
+    console.log();
     
 })
-
+*/
 
 app.get('/image/:id', (req, res) => { // sends an image based on the id of parameters
     const { id } = req.params;
@@ -125,10 +127,9 @@ app.post('/signin', (req, res) => {
     
     const {email, password} = req.body; // get the email and password from body
 
-    if (!email) { // if email or password doesnt exist in json request return incorrect form submission
+    if (!email || !password) { // if email or password doesnt exist in json request return incorrect form submission
         return res.status(400).json('incorrect form submission');
       }
-
     db.select('email', 'hash').from('login') // get email and hash from login table
         .where('email', '=', email) // select the row where email is equal to req.email
         .then(data => {
@@ -215,13 +216,17 @@ app.post('/register', (req, res) => { // adds a new users to the users table
    
 })
 
+app.post('/changeprofile', (req, res) => {
+    res.json("profile changed");
+})
+
 app.get('/getproducts', (req, res) => { // gets all products from  db
     db.select('*').from('products').then(data=> {
         res.json(data); // responds with some cool ass data
     });
 })
 
-app.get('/mostpopular', (req, res) => { // returns the most popular 
+app.get('/mostpopular', (req, res) => { // returns the most popular products
     db.select('*').from('products').then(data=> {
         res.json(data); // responds with some cool ass data
     });
@@ -241,12 +246,25 @@ app.post('/unregister', (req, res) => { // deletes a user
                 //console.log(data[0]);
                 if (data[0] !== undefined) {
                     console.log("user with that name was found")
-                    db('users')
-                    .where('username', name)
-                    .del()
-                    .then(data => {
-                        console.log("user deleted from database");
-                        res.json("User deleted from database"); // responds with some cool ass data
+                    db.select('hash').from('login').where('email', '=', email).then(hs => {
+                        const isValid = bcrypt.compareSync(password, hs[0].hash);
+                        if (isValid) {
+                            console.log("hash matches");
+                            db('users')
+                            .where('username', name)
+                            .del()
+                            .then(data => {
+                                db('login').where('email', email)
+                                .del()
+                                .then( data => {
+                                    console.log("user deleted from users and login table");
+                                    res.json("User deleted from database"); // responds with some cool ass data
+                                })
+                            })
+                        }
+                        else {
+                            res.json('Hash doesnt match');
+                        }
                     })
                     
                 }
