@@ -111,8 +111,6 @@ app.get('/profile/:id', (req, res) => {
     
 })
 */
-app.get('/getuser')
-
 
 app.get('/getproducts', (req, res) => { // gets all products from  db
     db.select('*').from('products').then(data=> {
@@ -124,9 +122,8 @@ app.get('/getproducts', (req, res) => { // gets all products from  db
 //app.post('/changeCredentials')
 
 app.post('/signin', (req, res) => {
-    
     const {email, password} = req.body; // get the email and password from body
-
+    console.log(email, password, "LOGIN DAAT");
     if (!email || !password) { // if email or password doesnt exist in json request return incorrect form submission
         return res.status(400).json('incorrect form submission');
       }
@@ -154,6 +151,10 @@ app.post('/signin', (req, res) => {
             res.status(400).json("Fail");
         }
 
+        })
+        .catch(err => {
+            console.log("error happened");
+            res.json("Fail")
         })
 
 })
@@ -216,8 +217,54 @@ app.post('/register', (req, res) => { // adds a new users to the users table
    
 })
 
-app.post('/changeprofile', (req, res) => {
-    res.json("profile changed");
+
+
+app.post('/changeprofile/:id', (req, res) => {
+
+    const {email, name} = req.body
+    const { id } = req.params;
+    console.log("THIS", id, email, name)
+    db('users').where('email', email).orWhere('username', name)
+    .then(data => {
+        if (data[0]===undefined) {
+            console.log("no dublicate users found")
+            db('users').where('id', id)
+    .then(data => {
+        db('login').where('email', data[0].email)
+        .update({ email : email })
+        .then(data => {
+            db('users').where('id', id)
+            .update({ username:name, email:email })
+            .then(data => {
+                res.json("data changed")
+            })
+        })
+    })
+    .catch(err => {
+        console.log(err, "RERER");
+        res.json("id not found")
+    })
+    /*
+    db('users').where('id', id) // select from users where id is equal to id
+    .update( {email : email, username: name}) // update email and name*/
+    .then(em => { // 
+
+        
+    })
+    
+    
+        }
+    
+        else {
+            console.log("dublicate exists")
+            res.json("dublicate username or email exists");
+        }
+    })
+    .catch(err => {
+        console.log("getting data didint work")
+        res.json("error while getting data")
+    })
+    
 })
 
 app.get('/getproducts', (req, res) => { // gets all products from  db
@@ -246,8 +293,10 @@ app.post('/unregister', (req, res) => { // deletes a user
                 //console.log(data[0]);
                 if (data[0] !== undefined) {
                     console.log("user with that name was found")
-                    db.select('hash').from('login').where('email', '=', email).then(hs => {
-                        const isValid = bcrypt.compareSync(password, hs[0].hash);
+                    db('login').where('email', email)
+                        .then(hs => {
+                        console.log(hs, "AND");
+                        const isValid = bcrypt.compareSync(password, hs[0]);
                         if (isValid) {
                             console.log("hash matches");
                             db('users')
