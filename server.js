@@ -6,13 +6,10 @@ const cors = require('cors');
 const bcrypt = require('bcrypt-nodejs');
 const jwt = require('jsonwebtoken');
 
-//Setup Redis
+/* SETUP REDIS
 const redis = require('redis')
 const redisClient = redis.createClient({host: '127.0.0.1'});
-
-const setToken = (token, email) = {
-    
-}
+*/
 
 
 const signin = require('./Controllers/signin');
