@@ -4,6 +4,18 @@ const bodyParser = require('body-parser');
 const knex = require('knex');
 const cors = require('cors');
 const bcrypt = require('bcrypt-nodejs');
+const jwt = require('jsonwebtoken');
+
+//Setup Redis
+const redis = require('redis')
+const redisClient = redis.createClient({host: '127.0.0.1'});
+
+const setToken = (token, email) = {
+    
+}
+
+
+const signin = require('./Controllers/signin');
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -77,7 +89,7 @@ app.get('/products', (req, res) => {
 app.get('/image/:id', (req, res) => { // sends an image based on the id of parameters
     const { id } = req.params;
     db('products').where('ID', id).then(data => {
-        res.sendFile(__dirname + `/images/${id}.png`);
+        res.sendFile(__dirname + `/new-images/${id}.png`);
         //res.sendFile(`:/images/${id}.png`);
     })
 })
@@ -119,45 +131,14 @@ app.get('/getproducts', (req, res) => { // gets all products from  db
 })
 
 
-//app.post('/changeCredentials')
-
-app.post('/signin', (req, res) => {
-    const {email, password} = req.body; // get the email and password from body
-    console.log(email, password, "LOGIN DAAT");
-    if (!email || !password) { // if email or password doesnt exist in json request return incorrect form submission
-        return res.status(400).json('incorrect form submission');
-      }
-    db.select('email', 'hash').from('login') // get email and hash from login table
-        .where('email', '=', email) // select the row where email is equal to req.email
-        .then(data => {
-            const isValid = bcrypt.compareSync(password, data[0].hash);
-            if (isValid) {
-
-                db.select('*').from('users')
-              .where('email', '=', email)
-              .then(data => {
-                  if (data.length > 0) {
-                    res.json(data);
-                  }
-                  else {
-                      res.status(400).json("Fail");
-                  }
-                  
-              })
-              .catch(err => res.status(400).json('wrong credentials'))
-        
-            }
-        else {
-            res.status(400).json("Fail");
-        }
-
-        })
-        .catch(err => {
-            console.log("error happened");
-            res.json("Fail")
-        })
-
+app.get('/sendtoken/:email', (req, res)=> { // signs a token and sends it to frontend
+    const { email } = req.params;
+    console.log(email)
+    res.json(jwt.sign(email, "secret"))
 })
+
+app.post('/signin', (req, res) => { signin.handleSignin(req, res, db, bcrypt) })
+
 
 app.post('/register', (req, res) => { // adds a new users to the users table
     const {email, name, password } = req.body; // destruct email, name, password from request
