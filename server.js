@@ -273,8 +273,9 @@ app.post('/unregister', (req, res) => { // deletes a user
                     console.log("user with that name was found")
                     db('login').where('email', email)
                         .then(hs => {
-                        console.log(hs, "AND");
-                        const isValid = bcrypt.compareSync(password, hs[0]);
+                        console.log(hs[0].hash, "AND");
+                        console.log(bcrypt.compareSync(password, hs[0].hash))
+                        const isValid = bcrypt.compareSync(password, hs[0].hash);
                         if (isValid) {
                             console.log("hash matches");
                             db('users')
