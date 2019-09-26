@@ -1,4 +1,5 @@
     // imports
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -12,6 +13,10 @@ const storage = multer.diskStorage({ // allows you to allicade where in storage 
         cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
     }
 });
+
+    // Middleware
+
+const checkAuth = require('./Middleware/check-auth')
 
 const upload = multer({storage: storage}); // set the storage for multer uploads
 const cors = require('cors');
@@ -52,7 +57,6 @@ app.use((req, res, next) => {
 
 
 
-
 const db = process.env.DATABASE_URL ? knex({
     client: 'pg',
     connection: {
@@ -72,7 +76,6 @@ const db = process.env.DATABASE_URL ? knex({
 
     // Select data for testing purposes
 
-//console.log(process.env.JWT_TOKEN)
 db.select('*').from('users').then(data => {
     console.log(data)
 })/*
@@ -83,14 +86,13 @@ db.select('*').from('users').then(data=> {
 }))*/
 
 
-    // Controllers
-
+    // Endpoints
 
 app.post('/signin', (req, res) => {signin.handleSignin(req, res, db, bcrypt) })
 app.post('register', (req, res) => {})
-app.post('/addproduct', upload.single('productImage'), (req, res) => { products.addProduct(req, res, db)})
-app.post('/deleteproduct/:id', (req, res) => { products.deleteProduct(req, res, db)})
-app.patch('/updateproduct/:id', (req, res) => { products.updateProduct(req, res, db)})
+app.post('/addproduct',checkAuth, upload.single('productImage'), (req, res) => { products.addProduct(req, res, db)})
+app.post('/deleteproduct/:id', checkAuth, (req, res) => { products.deleteProduct(req, res, db)})
+app.patch('/updateproduct/:id', checkAuth, (req, res) => { products.updateProduct(req, res, db)})
 
 
 
@@ -140,7 +142,8 @@ app.get('/products', (req, res) => {
 app.get('/image/:id', (req, res) => { // sends an image based on the id of parameters
     const { id } = req.params;
     db('products').where('ID', id).then(data => {
-        res.sendFile(__dirname + `/new-images/${id}.png`);
+        res.sendFile(__dirname + "/uploads/2019-09-26T08-14-26.125Zpresent.png")
+        //res.sendFile(__dirname + `/new-images/${id}.png`);
         //res.sendFile(`:/images/${id}.png`);
     })
 })
