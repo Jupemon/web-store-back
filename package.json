@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-
+    "start": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "juho",
@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.19.2",
+    "multer": "^1.4.2",
     "pg": "^7.12.1",
     "redis": "^2.8.0"
   },

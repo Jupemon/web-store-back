@@ -1,0 +1,59 @@
+"start": "nodemon",
+
+CREATE TABLE products (
+    amount smallint,
+    price numeric,
+    manufacturer text,
+    name text,
+    "ID" text,
+    color text,
+    taste text,
+    shape text
+);
+
+INSERT INTO products ()
+
+INSERT INTO products ("amount", "manufacturer", "name", "price", "ID", "category", "color") VALUES (200, 'Panda', 'Ahaa Chocolate Crisps', 1.29, '271', 'Chocolate', 'Brown');
+
+INSERT INTO products ("amount", "price", "manufacturer", "name", "ID", "color", "taste" "shape") VALUES
+(186, 'Cloetta', 'Brio Cream', 1.29, '52', 'Toffee', 'Brown'),
+(150, 'Cloetta', 'Center ', 1.29, '994', 'Toffee', 'Brown'),
+(150, 'Cloetta', 'Center ', 1.29, '994', 'Toffee', 'Brown'),
+
+
+INSERT INTO products ("amount", "price", "manufacturer", "name", "ID", "color", "taste", "shape") VALUES
+(185, '1.29', 'Cloetta', 'Red Monkey', '1005', 'Red', 'Fruity', 'Animal'),
+(132, '1.29', 'Cloetta', 'Rage Monkey', '56', 'Black', 'Liquorice', 'Animal'),
+(116, '1.29', 'Panda', 'Chocolate Crisp', '271', 'Brown', 'Chocolate', 'Cylinder'),
+(145, '1.29', 'Ravazzi', 'Sugar Banana', '1751', 'Yellow', 'Fruity', 'Fruit'), 
+(135, '1.29', 'Ravazzi', 'Hard Banana', '562', 'Yellow', 'Fruity', 'Fruit'),
+(123, '1.29', 'Fazer', 'Liquorice Ace', '1685', 'Black', 'Liquorice', 'Card Suit'),
+(121, '1.29', 'Grahns', 'Liquorice Ball', '1893', 'Black', 'Liquorice', 'Ball'),
+(151, '1.29', 'Grahns', 'Strawberry Ball', '1894', 'Pink', 'Fruity', 'Ball'),
+(33, '1.29', 'Jamtgott', 'Cola Skull', '193', 'Brown', 'Sour', 'Skull'),
+(22, '1.29', 'Ravazzi', 'Cola Bottle', '1752', 'Yellow', 'Fruity', 'Bottle'),
+(12, '1.29', 'Jamtgott', 'Dragster Liquorice', '205', 'Black', 'Liquorice', 'Ring'),
+(53, '1.29', 'Franssons', 'Fizzy Ring', '1665', 'Blue', 'Fruity', 'Ring'),
+(21, '1.29', 'Franssons', 'Golf Strawberry', '125', 'Red', 'Sour', 'Ball'),
+(61, '1.29', 'Franssons', 'Golf Apple', '124', 'Green', 'Sour', 'Ball'),
+(21, '1.29', 'Grahns', 'Fruit Brick', '1552', 'Green', 'Sour', 'Brick'),
+(26, '1.29', 'Grahns', 'Fruit Meteor', '1865', 'Pink', 'Fruity', 'Ball'),
+(123, '1.29', 'Grahns', 'Fruit Brick', '124', 'Green', 'Sour', 'Brick'),
+(24, '1.29', 'Haribo', 'Happy Cola', '1768', 'Orange', 'Fruity', 'Bottle'),
+(74, '1.29', 'Ravazzi', 'Yogurt Cashew Choco', '22', 'White', 'Chocolate', 'Ball'),
+(25, '1.29', 'Grahns', 'Cream Choco', '78', 'Brown', 'Chocolate', 'Ball'),
+(11, '1.29', 'Halva', 'King Kong', '1679', 'Black', 'Liquorice', 'Animal'),
+(11, '1.29', 'Fazer', 'Marianne hail', '907', 'White', 'Chocolate', 'Ball');
+
+
+UPDATE products
+SET color = 'Brown'
+WHERE name = 'Cola Skull';
+
+CREATE TABLE ownerlogin (
+id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+firstname VARCHAR(30) NOT NULL,
+lastname VARCHAR(30) NOT NULL,
+email VARCHAR(50),
+reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)

@@ -1,7 +1,19 @@
+    // imports
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const knex = require('knex');
+const multer = require('multer');
+const storage = multer.diskStorage({ // allows you to allicade where in storage is saved to
+    destination: function(req, file, cb) { // specify destination for the images
+        cb(null, './uploads');
+    },
+    filename: function(req, file, cb) { // run any functions to images
+        cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+    }
+});
+
+const upload = multer({storage: storage}); // set the storage for multer uploads
 const cors = require('cors');
 const bcrypt = require('bcrypt-nodejs');
 const jwt = require('jsonwebtoken');
@@ -11,11 +23,35 @@ const redis = require('redis')
 const redisClient = redis.createClient({host: '127.0.0.1'});
 */
 
+    // controllers
 
 const signin = require('./Controllers/signin');
+const products = require('./Controllers/products');
+const orders = require('./Controllers/orders');
 
+    // using
+
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 app.use(cors());
+
+    // prevent unauthorized access
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Orgin', '*');
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Orgin, X-Requested-With, Content-Type, Accept, Autorizaton"
+    );
+    if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
+        return res.status(200).json({})
+    }
+    next();
+})
+
+
+
 
 const db = process.env.DATABASE_URL ? knex({
     client: 'pg',
@@ -34,11 +70,29 @@ const db = process.env.DATABASE_URL ? knex({
 
     }});
 
+    // Select data for testing purposes
+
+//console.log(process.env.JWT_TOKEN)
+db.select('*').from('users').then(data => {
+    console.log(data)
+})/*
 db.select('*').from('users').then(data=> {
     console.log(data);
 }).then(db('*').from('login').then(data => {
     console.log(data)
-}))
+}))*/
+
+
+    // Controllers
+
+
+app.post('/signin', (req, res) => {signin.handleSignin(req, res, db, bcrypt) })
+app.post('register', (req, res) => {})
+app.post('/addproduct', upload.single('productImage'), (req, res) => { products.addProduct(req, res, db)})
+app.post('/deleteproduct/:id', (req, res) => { products.deleteProduct(req, res, db)})
+app.patch('/updateproduct/:id', (req, res) => { products.updateProduct(req, res, db)})
+
+
 
 /*
 app.get('mostpopular'), (req, res) => {
@@ -127,20 +181,18 @@ app.get('/getproducts', (req, res) => { // gets all products from  db
     });
 })
 
-
 app.get('/sendtoken/:email', (req, res)=> { // signs a token and sends it to frontend
     const { email } = req.params;
     console.log(email)
     res.json(jwt.sign(email, "secret"))
 })
 
-app.post('/signin', (req, res) => { signin.handleSignin(req, res, db, bcrypt) })
-
 
 app.post('/register', (req, res) => { // adds a new users to the users table
-    const {email, name, password } = req.body; // destruct email, name, password from request
+    const {email, name, password, owner } = req.body; // destruct email, name, password from request
     console.log("REGISTER HAPPENS")
-
+    //console.log(typeof owner, owner)
+    const ownerValue = owner === "true";
     const hash = bcrypt.hashSync(password); // create an hash of the password
     //console.log(email, "EMAIL HERE");
     //console.log(name, "NAME HERE");
@@ -150,12 +202,12 @@ app.post('/register', (req, res) => { // adds a new users to the users table
         //console.log(data[0])
         if (data[0] === undefined) {
             console.log("no users by that email was found");
-            db('users').where('username', name)
+            db('users').where('name', name)
             .then(data=> {
                 //console.log(data[0]);
                 if (data[0] === undefined) {
                     console.log("no usernames or emails by that name");
-
+                    
                     db.transaction(trx => {
                         trx.insert({
                             hash: hash,
@@ -168,7 +220,8 @@ app.post('/register', (req, res) => { // adds a new users to the users table
                             .returning('*') // returnig everything from users 
                             .insert({
                                 email: loginEmail[0],
-                                username: name
+                                name: name,
+                                owner : ownerValue
                             })
                             .then(user => {
                                 res.json("User added to database");
@@ -323,6 +376,21 @@ app.post('/unregister', (req, res) => { // deletes a user
 
 
 */
+
+app.use((req, res, next) => {
+    const error = new Error('Not found');
+    error.status = 404;
+    next(error);
+})
+
+app.use((error, req, res, next) => {
+    res.status(error.status || 500);
+    res.json({
+        error: {
+            message: error.message
+        }
+    })
+});
 
 //3000 process.env.PORT
 app.listen(process.env.PORT || 3000, () => {
