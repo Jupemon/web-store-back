@@ -1,25 +1,28 @@
     // imports
 require('dotenv').config();
+const fs = require('fs');
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const knex = require('knex');
-const multer = require('multer');
-const storage = multer.diskStorage({ // allows you to allicade where in storage is saved to
+const multer = require('multer'); // used to parse form-data/multipart data
+const storage = multer.diskStorage({ // specify a fold
     destination: function(req, file, cb) { // specify destination for the images
-        cb(null, './uploads');
+        cb(null, './uploads'); // specify a folder where 
     },
     filename: function(req, file, cb) { // run any functions to images
-        cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+        cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname); // give the image file a name
     }
 });
 
     // Middleware
 
-const checkAuth = require('./Middleware/check-auth')
+const validateForm = require('./Middleware/validate-form');
+const checkAuth = require('./Middleware/check-auth');
 
 const upload = multer({storage: storage}); // set the storage for multer uploads
-const cors = require('cors');
+
 const bcrypt = require('bcrypt-nodejs');
 const jwt = require('jsonwebtoken');
 
@@ -29,33 +32,39 @@ const redisClient = redis.createClient({host: '127.0.0.1'});
 */
 
     // controllers
-
+const profile = require('./Controllers/profile')
+const filters = require('./Controllers/filters');
+const image = require('./Controllers/image');
+const categories = require('./Controllers/categories')
 const signin = require('./Controllers/signin');
 const products = require('./Controllers/products');
 const orders = require('./Controllers/orders');
+const register = require('./Controllers/register');
 
-    // using
+    // Parsing
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors())
 
-    // prevent unauthorized access
-
+    // prevent unauthorized acces, used in every request
+/*
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Orgin', '*');
     res.header(
         "Access-Control-Allow-Headers",
-        "Orgin, X-Requested-With, Content-Type, Accept, Autorizaton"
+        "Orgin, X-Requested-With, Content-Type, Accept, Authorization"
     );
     if (req.method === 'OPTIONS') {
         res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
-        return res.status(200).json({})
+        return res.status(200).json({
+            info : "not allowed, dont know why"
+        })
     }
     next();
-})
+})*/
 
-
+    // DB connection
 
 const db = process.env.DATABASE_URL ? knex({
     client: 'pg',
@@ -76,31 +85,56 @@ const db = process.env.DATABASE_URL ? knex({
 
     // Select data for testing purposes
 
-db.select('*').from('users').then(data => {
+//db('categories').update({ items : ["Black", "Blue", "Red", "Brown", 'Black', 'Yellow','Pink', 'Green','Orange', 'White']}).then((data) => {console.log(data)})
+//db('categories').insert({name : "shape", items: ["Animal", "Ring", "Ball"]}).then(() => {console.log("inserted")})
+db.select('*').from('categories').then( data => {
     console.log(data)
-})/*
+})
+/*
 db.select('*').from('users').then(data=> {
     console.log(data);
 }).then(db('*').from('login').then(data => {
     console.log(data)
 }))*/
 
+/*
+db.select('*').from('users').where('email', '=', "ttttt")
+.update({email : "owner@gmail.com"})
+.then(data => {
+    if (data.length > 0) {
+        console.log("user with that email exists")
+    }
+})
+*/
 
-    // Endpoints
+app.post('/test'), (req, res) => {
+    console.log(req.body, "BODY OF REQUEST");
+    console.log("testing worked");
+    res.json("working");
+}
 
+app.get('/', (req, res) => {
+    res.json("working"); // responds with some cool ass data
+})
+
+    // Endpoints ,
+//checkAuth validateForm, upload.single('productImage'),
+app.post('/changeprofile/:id', (req, res) => {profile.changeProfile(req, res, db)})
+app.post('/addfilter', checkAuth, (req, res) => {filters.addFilter(req, res, db)})
+app.post('/unregister', (req, res) => {register.unregister(req, res, db, bcrypt)}) // deletes a user
+app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
+app.get('/getproducts', (req, res) => {products.sendProducts(req, res, db)})
+app.get('/image/:id', (req, res) => {image.serveImage(req, res, db)})
+app.post('/deletecategory', (req, res) => {categories.removeCategory(req, res, db)});
+app.post('/addcategory', (req, res) => {categories.addCategory(req, res, db)})
+app.get('/getcategories', (req, res) => {categories.getCategories(req, res, db )})
+app.get('/getitem', (req, res) => {products.get})
 app.post('/signin', (req, res) => {signin.handleSignin(req, res, db, bcrypt) })
 app.post('register', (req, res) => {})
-app.post('/addproduct',checkAuth, upload.single('productImage'), (req, res) => { products.addProduct(req, res, db)})
+app.post('/addproduct', checkAuth, upload.single("productImage"), (req, res) => { products.addProduct(req, res, db)})
 app.post('/deleteproduct/:id', checkAuth, (req, res) => { products.deleteProduct(req, res, db)})
-app.patch('/updateproduct/:id', checkAuth, (req, res) => { products.updateProduct(req, res, db)})
+app.patch('/updateproduct/:id', checkAuth, upload.none(), (req, res) => { products.updateProduct(req, res, db)})
 
-
-
-/*
-app.get('mostpopular'), (req, res) => {
-    
-}
-*/
 
 /*
 app.get('/products', (req, res) => {
@@ -139,17 +173,7 @@ app.get('/products', (req, res) => {
 })
 */
 
-app.get('/image/:id', (req, res) => { // sends an image based on the id of parameters
-    const { id } = req.params;
-    db('products').where('ID', id).then(data => {
-        res.sendFile(__dirname + "/uploads/2019-09-26T08-14-26.125Zpresent.png")
-        //res.sendFile(__dirname + `/new-images/${id}.png`);
-        //res.sendFile(`:/images/${id}.png`);
-    })
-})
-app.get('/', (req, res) => {
-    res.json("working"); // responds with some cool ass data
-})
+
 /*
 app.get('/', (req, res) => {
     const id = "271"
@@ -178,141 +202,12 @@ app.get('/profile/:id', (req, res) => {
 })
 */
 
-app.get('/getproducts', (req, res) => { // gets all products from  db
-    db.select('*').from('products').then(data=> {
-        res.json(data); // responds with some cool ass data
-    });
-})
-
-app.get('/sendtoken/:email', (req, res)=> { // signs a token and sends it to frontend
-    const { email } = req.params;
-    console.log(email)
-    res.json(jwt.sign(email, "secret"))
-})
-
-
-app.post('/register', (req, res) => { // adds a new users to the users table
-    const {email, name, password, owner } = req.body; // destruct email, name, password from request
-    console.log("REGISTER HAPPENS")
-    //console.log(typeof owner, owner)
-    const ownerValue = owner === "true";
-    const hash = bcrypt.hashSync(password); // create an hash of the password
-    //console.log(email, "EMAIL HERE");
-    //console.log(name, "NAME HERE");
-
-    db('users').where('email', email) // check for duplicate emails or usernames
-    .then(data => {
-        //console.log(data[0])
-        if (data[0] === undefined) {
-            console.log("no users by that email was found");
-            db('users').where('name', name)
-            .then(data=> {
-                //console.log(data[0]);
-                if (data[0] === undefined) {
-                    console.log("no usernames or emails by that name");
-                    
-                    db.transaction(trx => {
-                        trx.insert({
-                            hash: hash,
-                            email: email
-                        })
-                        .into('login') // insert hash and email into login
-                        .returning('email') // return the email from the table
-                        .then(loginEmail => { // email returned
-                            return trx('users')
-                            .returning('*') // returnig everything from users 
-                            .insert({
-                                email: loginEmail[0],
-                                name: name,
-                                owner : ownerValue
-                            })
-                            .then(user => {
-                                res.json("User added to database");
-                            })
-                        })
-                        .then(trx.commit)
-                        .catch(trx.rollback)
-                    })
-
-                    
-                }
-                else {
-                    console.log("usernames already exists")
-                    res.json("failed to add user to database"); // responds with some cool ass data
-                }
-            })
-        }
-        else {
-            console.log("email already exists")
-            res.json("failed to add user to database"); // responds with some cool ass data
-        }
-    })
-
-   
-})
-
-
-
+/*
 app.post('/changeprofile/:id', (req, res) => {
 
-    const {email, name} = req.body
-    const { id } = req.params;
-    console.log("THIS", id, email, name)
-    db('users').where('email', email).orWhere('username', name)
-    .then(data => {
-        if (data[0]===undefined) {
-            console.log("no dublicate users found")
-            db('users').where('id', id)
-    .then(data => {
-        db('login').where('email', data[0].email)
-        .update({ email : email })
-        .then(data => {
-            db('users').where('id', id)
-            .update({ username:name, email:email })
-            .then(data => {
-                res.json("data changed")
-            })
-        })
-    })
-    .catch(err => {
-        console.log(err, "RERER");
-        res.json("id not found")
-    })
-    /*
-    db('users').where('id', id) // select from users where id is equal to id
-    .update( {email : email, username: name}) // update email and name*/
-    .then(em => { // 
-
-        
-    })
     
-    
-        }
-    
-        else {
-            console.log("dublicate exists")
-            res.json("dublicate username or email exists");
-        }
-    })
-    .catch(err => {
-        console.log("getting data didint work")
-        res.json("error while getting data")
-    })
     
 })
-
-app.get('/getproducts', (req, res) => { // gets all products from  db
-    db.select('*').from('products').then(data=> {
-        res.json(data); // responds with some cool ass data
-    });
-})
-
-app.get('/mostpopular', (req, res) => { // returns the most popular products
-    db.select('*').from('products').then(data=> {
-        res.json(data); // responds with some cool ass data
-    });
-})
-
 app.post('/unregister', (req, res) => { // deletes a user
     const {email, name, password} = req.body; // desctructure the emai, name, passwod
 
@@ -369,7 +264,7 @@ app.post('/unregister', (req, res) => { // deletes a user
     
 })
 
-
+*/
 /*
 /signin
 /register
@@ -379,6 +274,7 @@ app.post('/unregister', (req, res) => { // deletes a user
 
 
 */
+    // Error handling
 
 app.use((req, res, next) => {
     const error = new Error('Not found');
@@ -394,6 +290,8 @@ app.use((error, req, res, next) => {
         }
     })
 });
+
+    // Port
 
 //3000 process.env.PORT
 app.listen(process.env.PORT || 3000, () => {
