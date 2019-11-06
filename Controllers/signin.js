@@ -13,13 +13,16 @@ const handleSignin = ( req, res, db, bcrypt) => {
     db.select('email', 'hash').from('login') // get email and hash from login table
         .where('email', '=', email) // select the row where email is equal to req.email
         .then(data => {
+            console.log("email found")
             const isValid = bcrypt.compareSync(password, data[0].hash);
+            console.log("is passowrd valid next")
             if (isValid) {
-  
-                db.select('*').from('users')
-              .where('email', '=', email)
+              console.log("password valid")
+                db.select('*').from('users') // select everything from users 
+              .where('email', '=', email) // where email is equal to 
               .then(data => { // error here
-                  if (data.length > 0) {
+                console.log(data, "DATA FOUND ")
+                  if (data.length > 0) { // user exists
                     if (data[0].owner) { //user is owner send all data
                       
                       console.log(data[0].id, data[0].email)
@@ -28,14 +31,15 @@ const handleSignin = ( req, res, db, bcrypt) => {
                           email: data[0].email,
                           userId: data[0].id
                         },
-                        "secret",
+                        process.env.JWT_TOKEN,
                         {
                           expiresIn: "1h"
                         }
                       )
                       res.status(200).json({
                         message: "Auth successfull",
-                        token: token
+                        token: token,
+                        account : data[0]
                       })
                     }
                     else {  // remove any info about owner status here
@@ -53,7 +57,7 @@ const handleSignin = ( req, res, db, bcrypt) => {
         
             }
         else {
-            res.status(400).json("Fail");
+            res.status(400).json("Failed");
         }
   
         })
