@@ -107,10 +107,10 @@ db.select('*').from('users').where('email', '=', "ttttt")
 })
 */
 
-app.post('/test'), (req, res) => {
+app.get('/test'), (req, res) => {
     console.log(req.body, "BODY OF REQUEST");
     console.log("testing worked");
-    res.json("working");
+    res.sendFile("uploads\2019-10-01T14-04-59.993Z125.png")
 }
 
 app.get('/', (req, res) => {
