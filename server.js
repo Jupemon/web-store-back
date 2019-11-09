@@ -1,5 +1,6 @@
     // imports
 require('dotenv').config();
+const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const app = express();
@@ -107,13 +108,14 @@ db.select('*').from('users').where('email', '=', "ttttt")
 })
 */
 
-app.get('/test'), (req, res) => {
+app.get('/test', (req, res) => {
     console.log(req.body, "BODY OF REQUEST");
     console.log("testing worked");
-    res.sendFile("uploads\2019-10-01T14-04-59.993Z125.png")
-}
+    res.sendFile(path.join(__dirname, '/uploads', '2019-11-07T10-31-52.775Z78.png'));
+})
 
 app.get('/', (req, res) => {
+    console.log("working")
     res.json("working"); // responds with some cool ass data
 })
 
