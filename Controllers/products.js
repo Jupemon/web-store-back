@@ -61,6 +61,7 @@ const addProduct = (req, res, db) => { // add a product to the database POST
             objectToInsert
         ).then(data => {
             res.status(400);
+            console.log("product succesfully added")
             res.json('product added');
         })
         .catch(er => {
