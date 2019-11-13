@@ -10,9 +10,10 @@ const knex = require('knex');
 const multer = require('multer'); // used to parse form-data/multipart data
 const storage = multer.diskStorage({ // specify a fold
     destination: function(req, file, cb) { // specify destination for the images
-        cb(null, './uploads'); // specify a folder where 
+        cb(null, 'uploads'); // specify a folder where 
     },
     filename: function(req, file, cb) { // run any functions to images
+        console.log(file, "FILE HERE")
         cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname); // give the image file a name
     }
 });
@@ -108,10 +109,11 @@ db.select('*').from('users').where('email', '=', "ttttt")
 })
 */
 
-app.get('/test', (req, res) => {
+app.post('/test', upload.single('productImage'), (req, res, next) => {
     console.log(req.body, "BODY OF REQUEST");
+    console.log(req.file)
     console.log("testing worked");
-    res.sendFile(path.join(__dirname, '/uploads', '2019-11-07T10-31-52.775Z78.png'));
+    res.json("ok")
 })
 
 app.get('/', (req, res) => {

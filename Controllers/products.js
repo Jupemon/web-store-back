@@ -42,7 +42,9 @@ const deleteProduct = (req, res, db) => { // delete a product with a certain id 
 
 const addProduct = (req, res, db) => { // add a product to the database POST
     console.log("adding product")
+    console.log(req.file.path)
     const path = req.file.path
+    console.log(path, "PATH HERE")
     const {amount, price, manufacturer, name, color, taste, shape} = req.body;
     
     const objectToInsert = {}
