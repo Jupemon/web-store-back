@@ -135,7 +135,7 @@ app.get('/getcategories', (req, res) => {categories.getCategories(req, res, db )
 app.get('/getitem', (req, res) => {products.get})
 app.post('/signin', (req, res) => {signin.handleSignin(req, res, db, bcrypt) })
 app.post('register', (req, res) => {})
-app.post('/addproduct', checkAuth, upload.single("productImage"), (req, res) => { products.addProduct(req, res, db)})
+app.post('/addproduct', upload.single("productImage"), (req, res) => { products.addProduct(req, res, db)})
 app.post('/deleteproduct/:id', checkAuth, (req, res) => { products.deleteProduct(req, res, db)})
 app.patch('/updateproduct/:id', checkAuth, upload.none(), (req, res) => { products.updateProduct(req, res, db)})
 
