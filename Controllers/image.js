@@ -1,7 +1,16 @@
+const fs = require('fs');
+const folder = './uploads/'
+
 const path = require("path");
 const options = { // options for the image serving
     root: 'uploads'
 }
+
+console.log(fs.readdir(folder, (err, files) => {
+    files.forEach(file => {
+        console.log(file)
+    })
+}))
 
 const serveImage = (req, res, db) => {
     const { id } = req.params;
