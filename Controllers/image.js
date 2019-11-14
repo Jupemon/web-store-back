@@ -8,8 +8,8 @@ const serveImage = (req, res, db) => {
     db('products').where('productid', id).then(data => {
         //console.log(data[0].productimage, "PRODUCT IMAGE DATA HERE")
         //console.log(data[0].productimage.replace("uploads", ""), "PRODUCT DATA CHANGED HERE")
-        //res.sendFile(path.join(__dirname+'../uploads/'));
-        res.sendFile(path.join(__dirname + '../' + data[0].productimage), (err ) => {
+        //res.sendFile(path.join(__dirname+'../uploads/'));     
+        res.sendFile(data[0].productimage.replace("uploads\\", "") , options), (err) => {
             if (err) {
                 res.status(404);
                 res.json(err)
@@ -17,17 +17,7 @@ const serveImage = (req, res, db) => {
             else {
                 console.log("file sent")
             }
-        })
-        /*
-        res.sendFile(data[0].productimage.replace("/uploads", ""), options, (err) => {
-            if (err) {
-                res.status(404);
-                res.json(err)
-            }
-            else {
-                console.log( "file sent")
-            }
-        })*/
+        }
         //res.sendFile(__dirname + `/new-images/${id}.png`);
         //res.sendFile(`:/images/${id}.png`);
     })
