@@ -123,6 +123,7 @@ app.get('/', (req, res) => {
 
     // Endpoints ,
 //checkAuth validateForm, upload.single('productImage'),
+app.get('/getgoogleauthlink', (req, res) => {})
 app.post('/changeprofile/:id', (req, res) => {profile.changeProfile(req, res, db)})
 app.post('/addfilter', checkAuth, (req, res) => {filters.addFilter(req, res, db)})
 app.post('/unregister', (req, res) => {register.unregister(req, res, db, bcrypt)}) // deletes a user
