@@ -84,7 +84,26 @@ const sendProducts = (req, res, db) => {
         });
 }
 
-
+const mostPopular = (req, res, db) => { // responds with the 3 most popular products
+    console.log(req.params)
+    if (req.params.amount > 0) {
+        db("products").whereBetween("popularity", [1, req.params.amount])
+        .then(data => {
+            res.status(200)
+            res.json(data)
+        })
+        .catch(err => {
+            console.log("error happened")
+            console.log(err)
+            res.status(500)
+            res.json("internal server error")
+        })
+    }
+    else {
+        res.status(400)
+        res.json("bad request")
+    }
+}
 
 const updateProduct = (req, res, db) => { // update product data PATCH
     const {amount, price, manufacturer, name, color, taste, shape} = req.body;
@@ -151,5 +170,6 @@ module.exports = { // export the signin function
     addProduct: addProduct,
     deleteProduct : deleteProduct,
     updateProduct : updateProduct,
-    sendProducts : sendProducts
+    sendProducts : sendProducts,
+    mostPopular : mostPopular
   }

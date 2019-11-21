@@ -22,6 +22,7 @@ const storage = multer.diskStorage({ // specify a fold
 
 const validateForm = require('./Middleware/validate-form');
 const checkAuth = require('./Middleware/check-auth');
+const validateInt = require('./Middleware/Validate/validate-params-integer');
 
 const upload = multer({storage: storage}); // set the storage for multer uploads
 
@@ -130,6 +131,7 @@ app.post('/unregister', (req, res) => {register.unregister(req, res, db, bcrypt)
 app.post('/register', (req, res) => {register.handleRegister(req, res, db, bcrypt)})
 app.get('/getproducts', (req, res) => {products.sendProducts(req, res, db)})
 app.get('/image/:id', (req, res) => {image.serveImage(req, res, db)})
+app.get('/mostpopular/:amount', validateInt, (req, res) => {products.mostPopular(req, res, db)})
 app.post('/deletecategory', (req, res) => {categories.removeCategory(req, res, db)});
 app.post('/addcategory', (req, res) => {categories.addCategory(req, res, db)})
 app.get('/getcategories', (req, res) => {categories.getCategories(req, res, db )})
