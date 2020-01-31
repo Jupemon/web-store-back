@@ -86,7 +86,7 @@ const sendProducts = (req, res, db) => {
 
 const mostPopular = (req, res, db) => { // responds with the 3 most popular products
     console.log(req.params)
-    if (req.params.amount > 0) {
+    if (req.params.amount > 0 && req.pa) { // error boundry, prevent 
         db("products").whereBetween("popularity", [1, req.params.amount])
         .then(data => {
             res.status(200)
